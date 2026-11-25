@@ -152,10 +152,25 @@ Header `Server: nginx` và các security header cho thấy request đi qua Nginx
 
 ### Exercise 3.1 / 3.2: Deploy
 
-- **Nền tảng chính:** _⏳ điền sau khi deploy (Railway hoặc Render)_
-- **URL:** _⏳ điền URL public_
-- **Kết quả 4 lệnh tự kiểm ở CP6:** _⏳ dán output (200 / 200 / 401 / 200)_
-- Screenshot: `screenshots/dashboard.png`, `screenshots/running.png`, `screenshots/test.png`
+- **Nền tảng chính:** **Render** (Exercise 3.2, Blueprint `06-lab-complete/render.yaml`): web service `day14-agent` (Docker) + Key Value `day14-redis`.
+- **URL:** **https://day14-agent-pm39.onrender.com**
+- **Kết quả 4 lệnh tự kiểm ở CP6** (2026-11-25):
+
+```text
+$ curl -sS -o /dev/null -w '%{http_code}\n' "$BASE/health"
+200
+$ curl -sS -o /dev/null -w '%{http_code}\n' "$BASE/ready"
+200
+$ curl -sS -o /dev/null -w '%{http_code}\n' -X POST "$BASE/ask" -H 'Content-Type: application/json' -d '{"question":"Hello"}'
+401
+$ curl -sS -o /dev/null -w '%{http_code}\n' -X POST "$BASE/ask" -H 'Content-Type: application/json' -H "X-API-Key: $AGENT_API_KEY" -d '{"question":"Hello"}'
+200
+```
+
+- Rate limit trên cloud: 12 request liên tiếp → `200 ×8, 429 ×4` (cộng 2 request trước đó trong cùng phút là đúng 10/phút; state trong Redis của Render).
+- `check_production_ready.py --public-url https://day14-agent-pm39.onrender.com` → `✅ Public URL: GET .../health → 200`.
+- Railway: đã thử deploy từ GitHub nhưng Railway báo `Invalid service name` vì lấy tên repo (quá dài) làm tên service; Railway CLI thì bị Windows Smart App Control chặn. Vì vậy chọn Render làm nền tảng chính. `railway.toml` vẫn được giữ đúng chuẩn (script chấm ✅).
+- Screenshot: [`screenshots/dashboard.png`](screenshots/dashboard.png), [`screenshots/running.png`](screenshots/running.png), [`screenshots/test.png`](screenshots/test.png). Chi tiết: [DEPLOYMENT.md](DEPLOYMENT.md).
 
 ### So sánh `railway.toml` với `render.yaml` (của `06-lab-complete/`)
 
@@ -427,4 +442,4 @@ Theo [RULES.md](RULES.md) mục 1. Công cụ: **Claude Code (Claude Opus 5.5)**
 | 6 | Part 7 Bước 2 | Phát hiện và sửa lỗi `ModuleNotFoundError: uvicorn` trong `production/Dockerfile` (thiếu `PYTHONUSERBASE`); chạy Locust scale 1/3; làm thí nghiệm A–E, đo thời gian firing qua Prometheus API; chụp Grafana/Jaeger/Prometheus bằng Edge headless (Playwright) | `promtool test rules` SUCCESS; số scaling khớp `benchmark-results/*.csv`; ảnh là màn hình thật của stack đang chạy |
 | 7 | Viết `MISSION_ANSWERS.md`, `BENCHMARK_REPORT.md`, `DEPLOYMENT.md` | AI soạn nội dung dựa trên output đã chạy | Cần tự đọc lại và hiểu từng đoạn: Lab Coach có thể hỏi bất kỳ dòng code hay con số nào |
 
-Phần AI **không** làm được: deploy lên Railway/Render (cần đăng nhập tài khoản cloud cá nhân), chụp ảnh dashboard cloud, điền URL public (xem `DEPLOYMENT.md`).
+| 8 | Deploy cloud (Part 3) | Hướng dẫn từng bước deploy Render Blueprint (tôi tự đăng nhập và bấm deploy trên dashboard; Railway lỗi `Invalid service name` do tên repo dài). Sau khi có URL, AI chạy 4 lệnh tự kiểm, test rate limit, `--public-url`, cập nhật `DEPLOYMENT.md` | Output 200 / 200 / 401 / 200 trong `DEPLOYMENT.md` và `screenshots/test.png`; `dashboard.png` và `running.png` là ảnh tôi tự chụp từ Render |
