@@ -1,0 +1,32 @@
+# Quality gate (Exercise 7.3): PR nào làm accuracy < 85% hoặc gây regression so với
+# baseline đã commit thì job fail (run_eval.py trả exit code 1) → branch protection chặn merge.
+name: quality-gate
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: 06-lab-complete/benchmark-observability/develop
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements.txt
+      - name: Start agent v2
+        run: |
+          AGENT_VERSION=v2 MOCK_ERROR_RATE=0 PORT=8000 python app.py &
+          for i in $(seq 1 20); do curl -sf http://localhost:8000/health && break; sleep 1; done
+      - name: Eval + quality gate
+        run: |
+          python eval/run_eval.py --url http://localhost:8000 \
+            --min-accuracy 0.85 --baseline reports/eval_v2_fixed.json --out eval_ci.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: eval-report
+          path: 06-lab-complete/benchmark-observability/develop/eval_ci.json

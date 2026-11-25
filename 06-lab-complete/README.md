@@ -14,18 +14,18 @@ python check_production_ready.py
 
 ## Checklist Deliverable
 
-- [ ] Dockerfile (multi-stage, < 500 MB)
-- [ ] docker-compose.yml (agent + redis)
-- [ ] .dockerignore
-- [ ] Health check endpoint (`GET /health`)
-- [ ] Readiness endpoint (`GET /ready`)
-- [ ] API Key authentication
-- [ ] Rate limiting
-- [ ] Cost guard
-- [ ] Config từ environment variables
-- [ ] Structured logging
-- [ ] Graceful shutdown
-- [ ] Public URL ready (Railway / Render config)
+- [x] Dockerfile (multi-stage, < 500 MB)
+- [x] docker-compose.yml (agent + redis)
+- [x] .dockerignore
+- [x] Health check endpoint (`GET /health`)
+- [x] Readiness endpoint (`GET /ready`)
+- [x] API Key authentication
+- [x] Rate limiting
+- [x] Cost guard
+- [x] Config từ environment variables
+- [x] Structured logging
+- [x] Graceful shutdown
+- [x] Public URL ready (Railway / Render config)
 
 ---
 
